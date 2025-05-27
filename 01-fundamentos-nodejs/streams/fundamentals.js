@@ -30,6 +30,7 @@ class MultiplyByTenStream extends Writable {
     console.log(Number(chunk.toString()) * 10);
     callback();
   }
+  
 }
 
 new OneToHundredStream()
