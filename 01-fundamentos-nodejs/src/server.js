@@ -1,8 +1,6 @@
 import http from "node:http";
 import { json } from "./middlewares/json.js";
-import { Database } from "./database.js";
-
-const database = new Database();
+import { routes } from "./routes.js";
 
 const PORT = 3000;
 const server = http.createServer(async (req, res) => {
@@ -10,24 +8,15 @@ const server = http.createServer(async (req, res) => {
 
   await json(req, res);
 
-  if (method === "GET" && url === "/users") {
-    res.setHeader("Content-Type", "application/json");
-    const users = database.select("users");
-    return res.end(JSON.stringify(users));
+  const route = routes.find((route) => {
+    return route.method === method && route.path === url;
+  });
+
+  if (route) {
+    return route.handler(req, res);
   }
 
-  if (method === "POST" && url === "/users") {
-    const { name, email } = req.body;
-    const user = {
-      id: 1,
-      name,
-      email,
-    };
-
-    database.insert("users", user);
-    return res.end("Usuario criado com sucesso!");
-  }
-  return res.end("Hello World");
+  return res.end(404).end();
 });
 
 server.listen(PORT, () => {
